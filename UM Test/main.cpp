@@ -81,7 +81,7 @@ public:
 	template <typename T>
 	bool WriteVirtualMemory(ULONG_PTR procId, ULONG_PTR address, const T value)
 	{
-		return WriteVirtualMemory(procId, address, &value, sizeof(T));
+		return WriteVirtualMemory(procId, address, (void*)&value, sizeof(T));
 	}
 
 private:
@@ -110,17 +110,36 @@ void main()
 	printf("ProcessId -> %p\nClientDLL -> %p\n", process.ProcessId, process.ClientDLL);
 
 
-	// READ MEMORY
-	unsigned char buff[16];
-	if (KernelMemory.ReadVirtualMemory(process.ProcessId, process.ClientDLL + 0x1AF4B80, buff, sizeof(buff)))
+	while (true)
 	{
-		for (int i = 0; i < sizeof(buff); i++)
-		{
-			printf("%.2X ", buff[i]);
-		}
-		printf("\n");
-	}
+		if (GetAsyncKeyState(VK_END) & 1)
+			break;
 
-	Sleep(2000);
+		ULONG_PTR localpawn = 0;
+		if (!KernelMemory.ReadVirtualMemory(process.ProcessId, process.ClientDLL + 0x1AF4B80, &localpawn))
+		{
+			printf("> Failed to read local pawn?\n");
+			Sleep(250);
+			continue;
+		}
+
+		printf("LocalPawn -> %p\n", localpawn);
+		if (!localpawn)
+			continue;
+
+		float lastFlashTime;
+		if (KernelMemory.ReadVirtualMemory(process.ProcessId, localpawn + 0x1668, &lastFlashTime))
+		{
+			printf("Last flash -> %f\n", lastFlashTime);
+			if (lastFlashTime > 0)
+			{
+				// Remove flash effect by setting last flash time to 0
+				KernelMemory.WriteVirtualMemory(process.ProcessId, localpawn + 0x1668, 0.f);
+			}
+		}
+
+		Sleep(50);
+	}
+	Sleep(200);
 #endif
 }
