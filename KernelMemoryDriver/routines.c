@@ -1,5 +1,10 @@
 #include "routines.h"
-#include "processdata.h"
+#include "process.h"
+
+static const WCHAR* GAME_FOLDERS[2] = {
+    L"Counter-Strike Global Offensive\\game\\csgo\\bin\\win64\\",
+    L"Counter-Strike Global Offensive\\game\\bin\\win64\\"
+};
 
 VOID ProcessNotifyRoutine(
     PUNICODE_STRING FullImageName,
@@ -10,14 +15,29 @@ VOID ProcessNotifyRoutine(
     if (!FullImageName)
         return;
     
-    if (wcsstr(FullImageName->Buffer, L"Counter-Strike Global Offensive\\game\\csgo\\bin\\win64\\client.dll"))
+    for (int i = 0; i < ARRAYSIZE(GAME_FOLDERS); i++)
     {
-        DbgPrintEx(0, 0, "Counter-Strike ClientDLL Loaded: %wZ (Proc %X; Base %X)", FullImageName, ProcessId, ImageInfo->ImageBase);
+        const WCHAR* GameFolder = GAME_FOLDERS[i];
 
-        ExAcquireFastMutex(&CS2DataMutex);
-        CS2ProcessId = (ULONG_PTR)ProcessId;
-        CS2ClientDLL = (ULONG_PTR)ImageInfo->ImageBase;
-        ExReleaseFastMutex(&CS2DataMutex);
+        PWCHAR GamePath = wcsstr(FullImageName->Buffer, GameFolder);
+        if (!GamePath)
+            continue;
+
+        PWCHAR FileName = GamePath + wcslen(GameFolder);
+
+        // longer than .dll
+        if (wcslen(FileName) > 4)
+        {
+            DbgPrintEx(0, 0, "Counter-Strike ClientDLL Loaded: %ls (Proc %X; Base %X)", FileName, ProcessId, ImageInfo->ImageBase);
+
+            g_ProcessId = (ULONG_PTR)ProcessId;
+            InsertModuleToList(FileName, (ULONG_PTR)ImageInfo->ImageBase);
+
+            //ExAcquireFastMutex(&CS2DataMutex);
+            //CS2ProcessId = (ULONG_PTR)ProcessId;
+            //CS2ClientDLL = (ULONG_PTR)ImageInfo->ImageBase;
+            //ExReleaseFastMutex(&CS2DataMutex);
+        }
     }
 }
 

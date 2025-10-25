@@ -1,5 +1,5 @@
 #include "events.h"
-#include "processdata.h"
+#include "process.h"
 #include <iocodes.h>
 #include "memory.h"
 
@@ -52,17 +52,32 @@ NTSTATUS EvtIoDeviceControl(
 	ULONG IoInfo = 0;
 	switch (IoControlCode)
 	{
-	case IO_CTL_GETPROCESSHANDLE:
+	case IO_CTL_GETPROCESSID:
 	{
-		PIO_REQUEST_PROCESS_HANDLE IoRequest = (PIO_REQUEST_PROCESS_HANDLE)SystemBuffer;
+		PIO_REQUEST_PROCID IoRequest = (PIO_REQUEST_PROCID)SystemBuffer;
 		IoInfo = sizeof(*IoRequest);
 
-		ExAcquireFastMutex(&CS2DataMutex);
-		DbgPrintEx(0, 0, "IO_CTL ProcHandle: ProcessId(%.8X); ClientDll(%.8X)", CS2ProcessId, CS2ClientDLL);
+		IoRequest->ProcessId = GetTargetProcessId();
+		//ExAcquireFastMutex(&CS2DataMutex);
+		//DbgPrintEx(0, 0, "IO_CTL ProcHandle: ProcessId(%.8X); ClientDll(%.8X)", CS2ProcessId, CS2ClientDLL);
 
-		IoRequest->ProcessId = CS2ProcessId;
-		IoRequest->ClientDLL = CS2ClientDLL;
-		ExReleaseFastMutex(&CS2DataMutex);
+		//IoRequest->ProcessId = CS2ProcessId;
+		//IoRequest->ClientDLL = CS2ClientDLL;
+		//ExReleaseFastMutex(&CS2DataMutex);
+		break;
+	}
+	case IO_CTL_GETMODULEHANDLE:
+	{
+		PIO_REQUEST_MODULE_HANDLE IoRequest = (PIO_REQUEST_MODULE_HANDLE)SystemBuffer;
+		IoInfo = sizeof(*IoRequest);
+
+
+		PLOADED_PROCESS_MODULE Module = GetModuleFromList(IoRequest->ModuleName);
+		if (Module)
+			IoRequest->ImageBase = Module->ImageBase;
+		else
+			IoRequest->ImageBase = 0x00;
+
 		break;
 	}
 	case IO_CTL_READMEMORY:

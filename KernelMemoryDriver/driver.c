@@ -1,7 +1,7 @@
 #include "driver.h"
 #include "events.h"
 #include "routines.h"
-#include "processdata.h"
+#include "process.h"
 
 UNICODE_STRING g_SymName;
 PDEVICE_OBJECT g_DeviceObject;
@@ -41,7 +41,10 @@ NTSTATUS DriverEntry(
 	DriverObject->MajorFunction[IRP_MJ_CLOSE] = EvtCloseFile;
 	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] = EvtIoDeviceControl;
 
-	ExInitializeFastMutex(&CS2DataMutex);
+	//ExInitializeFastMutex(&CS2DataMutex);
+	DbgPrintEx(0, 0, "Init data...\n");
+
+	InitializeProcessData();
 	PsSetLoadImageNotifyRoutine(ProcessNotifyRoutine);
 
 	STATUS_INVALID_PARAMETER;
@@ -55,7 +58,6 @@ VOID DriverUnload(
 	UNREFERENCED_PARAMETER(DriverObject);
 
 	PsRemoveLoadImageNotifyRoutine(ProcessNotifyRoutine);
-	ExReleaseFastMutex(&CS2DataMutex);
 
 	IoDeleteSymbolicLink(&g_SymName);
 	IoDeleteDevice(g_DeviceObject);

@@ -36,6 +36,9 @@
     <ClCompile Include="memory.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="process.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="driver.h">
@@ -44,13 +47,13 @@
     <ClInclude Include="events.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="processdata.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="routines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="memory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="process.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -117,13 +117,14 @@
     <ClCompile Include="driver.c" />
     <ClCompile Include="events.c" />
     <ClCompile Include="memory.c" />
+    <ClCompile Include="process.c" />
     <ClCompile Include="routines.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="driver.h" />
     <ClInclude Include="events.h" />
     <ClInclude Include="memory.h" />
-    <ClInclude Include="processdata.h" />
+    <ClInclude Include="process.h" />
     <ClInclude Include="routines.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
