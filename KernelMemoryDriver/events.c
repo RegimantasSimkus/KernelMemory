@@ -42,8 +42,6 @@ NTSTATUS EvtIoDeviceControl(
 {
 	UNREFERENCED_PARAMETER(DeviceObject);
 
-	DbgPrintEx(0, 0, "Handling Device I/O...");
-
 	PIO_STACK_LOCATION IrpStack = IoGetCurrentIrpStackLocation(Irp);
 	ULONG IoControlCode = IrpStack->Parameters.DeviceIoControl.IoControlCode;
 	PVOID SystemBuffer = Irp->AssociatedIrp.SystemBuffer;
@@ -58,12 +56,6 @@ NTSTATUS EvtIoDeviceControl(
 		IoInfo = sizeof(*IoRequest);
 
 		IoRequest->ProcessId = GetTargetProcessId();
-		//ExAcquireFastMutex(&CS2DataMutex);
-		//DbgPrintEx(0, 0, "IO_CTL ProcHandle: ProcessId(%.8X); ClientDll(%.8X)", CS2ProcessId, CS2ClientDLL);
-
-		//IoRequest->ProcessId = CS2ProcessId;
-		//IoRequest->ClientDLL = CS2ClientDLL;
-		//ExReleaseFastMutex(&CS2DataMutex);
 		break;
 	}
 	case IO_CTL_GETMODULEHANDLE:
@@ -92,7 +84,6 @@ NTSTATUS EvtIoDeviceControl(
 			IoRequest->ReadSize
 		);
 
-		DbgPrintEx(0, 0, "I/O VM Read Status - %X", ReadStatus);
 		break;
 	}
 	case IO_CTL_WRITEMEMORY:
@@ -107,7 +98,6 @@ NTSTATUS EvtIoDeviceControl(
 			IoRequest->WriteSize
 		);
 
-		DbgPrintEx(0, 0, "I/O VM Write Status - %X", WriteStatus);
 		break;
 	}
 	default:
