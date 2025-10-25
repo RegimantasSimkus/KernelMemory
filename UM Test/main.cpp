@@ -1,145 +1,85 @@
 #include <Windows.h>
 #include <iostream>
-#include <iocodes.h>
+#include "KernelMemory.h"
+#include "Overlay.h"
+#include "CS2/CSGame.h"
+#include "CS2/CSFrameData.h"
 
-class KernelMemory
+inline CS2 Game;
+
+void Render()
 {
-public:
-	KernelMemory(const char* deviceName)
-	{
-		hFile = CreateFileA(deviceName, GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
-	}
+	FrameData.CaptureFrame();
 
-	~KernelMemory()
-	{
-		if (hFile && hFile != INVALID_HANDLE_VALUE)
-			CloseHandle(hFile);
-	}
+	CSPawn localPlayer = CS2::GetLocalPlayerPawn();
+	int localTeam = localPlayer.GetTeam();
+	
+	Vector3 localpos = localPlayer.GetOrigin();
+	Vector3 screenPos = localpos.ToScreen();
 
-	bool IsOpen()
+	for (int i = 0; i < 64; i++)
 	{
-		if (!hFile || hFile == INVALID_HANDLE_VALUE)
-			return false;
+		CSPawn player = CS2::GetPawnIndex(i);
+		if (!player)
+			continue;
 
-		return true;
-	}
+		if (player == localPlayer || player.GetTeam() == localTeam)
+			continue;
 
-	bool RequestGeneric(DWORD ioControlCode, void* request, size_t requestSize)
-	{
-		DWORD bytes;
-		BOOL ret = DeviceIoControl(
-			hFile,
-			ioControlCode,
-			request,
-			requestSize,
-			request,
-			requestSize,
-			&bytes,
-			nullptr
+		if (player.GetHealth() <= 0)
+			continue;
+
+		Vector3 playerpos = player.GetOrigin();
+		Vector3 screenpos = playerpos.ToScreen();
+		if (screenpos.z < 0.01f)
+			continue;
+
+		float distanceSqr = playerpos.DistanceSqr(localpos);
+		float ratio = (distanceSqr / (1700 * 1700));
+		if (ratio > 1)
+			ratio = 1;
+
+		D3DCOLOR col = D3DCOLOR_RGBA(
+			(int)(ratio * 255.f),
+			(int)((1 - ratio) * 255.f),
+			0,
+			255
 		);
 
-		return ret;
-	}
+		draw::DrawLine(FrameData.ScrW / 2, FrameData.ScrH, screenpos.x, screenpos.y, col);
 
-	template <typename T>
-	bool RequestGeneric(DWORD ioControlCode, T* request)
-	{
-		return RequestGeneric(ioControlCode, request, sizeof(T));
-	}
+		char text[10];
+		sprintf_s(text, "HP: %d", player.GetHealth());
 
-	bool GetProcessHandle(PIO_REQUEST_PROCESS_HANDLE request)
-	{
-		return RequestGeneric(IO_CTL_GETPROCESSHANDLE, request);
+		draw::DrawTextAOutlined(text, screenpos.x, screenpos.y, 1, D3DCOLOR_RGBA(255, 255, 255, 255), DT_CENTER);
 	}
-
-	bool ReadVirtualMemory(ULONG_PTR procId, ULONG_PTR address, void* buff, size_t readSize)
-	{
-		IO_REQUEST_READ_MEMORY request;
-		request.ProcessId = procId;
-		request.AddressFrom = address;
-		request.Buffer = buff;
-		request.ReadSize = readSize;
-		return RequestGeneric(IO_CTL_READMEMORY, &request);
-	}
-
-	template <typename T>
-	bool ReadVirtualMemory(ULONG_PTR procId, ULONG_PTR address, T* value)
-	{
-		return ReadVirtualMemory(procId, address, value, sizeof(T));
-	}
-
-	bool WriteVirtualMemory(ULONG_PTR procId, ULONG_PTR address, void* buff, size_t writeSize)
-	{
-		IO_REQUEST_WRITE_MEMORY request;
-		request.ProcessId = procId;
-		request.AddressTo = address;
-		request.Buffer = buff;
-		request.WriteSize = writeSize;
-		return RequestGeneric(IO_CTL_WRITEMEMORY, &request);
-	}
-
-	template <typename T>
-	bool WriteVirtualMemory(ULONG_PTR procId, ULONG_PTR address, const T value)
-	{
-		return WriteVirtualMemory(procId, address, (void*)&value, sizeof(T));
-	}
-
-private:
-	HANDLE hFile;
-};
+}
 
 void main()
 {
-
-#if 1
-	
-	KernelMemory KernelMemory = "\\\\.\\KernelMemory";
-	if (!KernelMemory.IsOpen())
+	if (!Memory.Initialize())
 	{
 		printf("Failed to open...\n");
 		return;
 	}
 
-	IO_REQUEST_PROCESS_HANDLE process;
-	if (!KernelMemory.GetProcessHandle(&process))
+	Overlay overlay;
+	overlay.SetTargetProcess(Memory.hWnd);
+	if (overlay.Create())
 	{
-		printf("Failed to get proc handle\n");
-		return;
+		printf("Successfully created!\n");
 	}
 
-	printf("ProcessId -> %p\nClientDLL -> %p\n", process.ProcessId, process.ClientDLL);
-
+	FrameData.ScrW = GetSystemMetrics(SM_CXSCREEN);
+	FrameData.ScrH = GetSystemMetrics(SM_CYSCREEN);
 
 	while (true)
 	{
 		if (GetAsyncKeyState(VK_END) & 1)
 			break;
 
-		ULONG_PTR localpawn = 0;
-		if (!KernelMemory.ReadVirtualMemory(process.ProcessId, process.ClientDLL + 0x1AF4B80, &localpawn))
-		{
-			printf("> Failed to read local pawn?\n");
-			Sleep(250);
-			continue;
-		}
-
-		printf("LocalPawn -> %p\n", localpawn);
-		if (!localpawn)
-			continue;
-
-		float lastFlashTime;
-		if (KernelMemory.ReadVirtualMemory(process.ProcessId, localpawn + 0x1668, &lastFlashTime))
-		{
-			printf("Last flash -> %f\n", lastFlashTime);
-			if (lastFlashTime > 0)
-			{
-				// Remove flash effect by setting last flash time to 0
-				KernelMemory.WriteVirtualMemory(process.ProcessId, localpawn + 0x1668, 0.f);
-			}
-		}
-
-		Sleep(50);
+		overlay.Think(Render);
 	}
-	Sleep(200);
-#endif
+
+	overlay.Destroy();
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -78,9 +78,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(SolutionDir)SharedFiles;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(ExternalIncludePath)</ExternalIncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(SolutionDir)SharedFiles;$(IncludePath)</IncludePath>
+    <ExternalIncludePath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Include;$(ExternalIncludePath)</ExternalIncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Microsoft DirectX SDK %28June 2010%29\Lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -88,6 +92,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -102,6 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -114,6 +120,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -128,6 +135,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,7 +143,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CS2\CSFrameData.cpp" />
+    <ClCompile Include="CS2\CSMemory.cpp" />
+    <ClCompile Include="CS2\Engine\Vector3.cpp" />
+    <ClCompile Include="CS2\CSGame.cpp" />
+    <ClCompile Include="CS2\Memory Structs\CSController.cpp" />
+    <ClCompile Include="CS2\Memory Structs\CSPawn.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Overlay\d3dxdraw.cpp" />
+    <ClCompile Include="Overlay\directx9.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CS2\CSFrameData.h" />
+    <ClInclude Include="CS2\CSMemory.h" />
+    <ClInclude Include="CS2\Memory Structs\CSController.h" />
+    <ClInclude Include="CS2\Memory Structs\CSPawn.h" />
+    <ClInclude Include="CS2\Engine\Vector3.h" />
+    <ClInclude Include="CS2\CSGame.h" />
+    <ClInclude Include="CS2\MemoryObject.h" />
+    <ClInclude Include="CS2\offsets.h" />
+    <ClInclude Include="CS2\Engine\ViewMatrix.h" />
+    <ClInclude Include="CS2\Offsets\client.h" />
+    <ClInclude Include="CS2\Offsets\offsets.h" />
+    <ClInclude Include="KernelMemory.h" />
+    <ClInclude Include="Overlay.h" />
+    <ClInclude Include="Overlay\d3dxdraw.h" />
+    <ClInclude Include="Overlay\directx9.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
