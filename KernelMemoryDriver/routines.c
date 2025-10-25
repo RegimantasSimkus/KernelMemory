@@ -28,15 +28,10 @@ VOID ProcessNotifyRoutine(
         // longer than .dll
         if (wcslen(FileName) > 4)
         {
-            DbgPrintEx(0, 0, "Counter-Strike ClientDLL Loaded: %ls (Proc %X; Base %X)", FileName, ProcessId, ImageInfo->ImageBase);
+            DbgPrintEx(0, 0, "Counter-Strike ClientDLL Loaded: \"%ls\" (Proc %X; Base %X)\n", FileName, ProcessId, ImageInfo->ImageBase);
 
             g_ProcessId = (ULONG_PTR)ProcessId;
             InsertModuleToList(FileName, (ULONG_PTR)ImageInfo->ImageBase);
-
-            //ExAcquireFastMutex(&CS2DataMutex);
-            //CS2ProcessId = (ULONG_PTR)ProcessId;
-            //CS2ClientDLL = (ULONG_PTR)ImageInfo->ImageBase;
-            //ExReleaseFastMutex(&CS2DataMutex);
         }
     }
 }

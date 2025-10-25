@@ -91,6 +91,13 @@ VOID InsertModuleToListEx(PWCHAR ModuleName, ULONG_PTR ImageBase)
 
 VOID InsertModuleToList(PWCHAR ModuleName, ULONG_PTR ImageBase)
 {
+	PLOADED_PROCESS_MODULE ModuleEntry = GetModuleFromList(ModuleName);
+	if (ModuleEntry)
+	{
+		ModuleEntry->ImageBase = ImageBase;
+		return;
+	}
+		
 	KIRQL oldIrql;
 	KeAcquireSpinLock(&g_ProcessDataMutex, &oldIrql);
 
