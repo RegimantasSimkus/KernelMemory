@@ -77,7 +77,7 @@ NTSTATUS EvtIoDeviceControl(
 		PIO_REQUEST_READ_MEMORY IoRequest = (PIO_REQUEST_READ_MEMORY)SystemBuffer;
 		IoInfo = sizeof(*IoRequest);
 
-		NTSTATUS ReadStatus = KernelReadVirtualMemory(
+		KernelReadVirtualMemory(
 			(HANDLE)IoRequest->ProcessId,
 			(const void*)IoRequest->AddressFrom,
 			IoRequest->Buffer,
@@ -91,7 +91,7 @@ NTSTATUS EvtIoDeviceControl(
 		PIO_REQUEST_WRITE_MEMORY IoRequest = (PIO_REQUEST_WRITE_MEMORY)SystemBuffer;
 		IoInfo = sizeof(*IoRequest);
 
-		NTSTATUS WriteStatus = KernelWriteVirtualMemory(
+		KernelWriteVirtualMemory(
 			(HANDLE)IoRequest->ProcessId,
 			(void*)IoRequest->AddressTo,
 			IoRequest->Buffer,
