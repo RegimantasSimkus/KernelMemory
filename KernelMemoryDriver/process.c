@@ -50,14 +50,12 @@ PVOID LoadedProcessModulesTableAllocateRoutine(
 {
 	UNREFERENCED_PARAMETER(Table);
 
+	// ExAllocatePool2 allocates zero-initialized memory
 	PVOID alloc = ExAllocatePool2(
 		POOL_FLAG_NON_PAGED,
 		Bytes,
 		'sckm' // kmcs - Kernel Memory CS
 	);
-
-	if (alloc)
-		RtlZeroMemory(alloc, Bytes);
 
 	return alloc;
 }
